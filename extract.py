@@ -1,10 +1,8 @@
-from transformers import AutoModel, AutoConfig, AutoModelForSeq2SeqLM, AutoModelForCausalLM, AutoModelForTokenClassification, AutoModelForQuestionAnswering, BitsAndBytesConfig
-import torch
+from transformers import AutoModel, AutoConfig, AutoModelForSeq2SeqLM, AutoModelForCausalLM, AutoModelForTokenClassification, AutoModelForQuestionAnswering
 import os
 import torch.nn as nn
 import dataclasses
 from typing import Optional
-from accelerate import infer_auto_device_map
 
 def convert_to_text(full_model_path: str, class_text: dict):
     """ Converts a model to text files, recursively"""
@@ -83,6 +81,7 @@ def text_module_to_files(text_module: TextModule, file_path: str, flat_folder: b
             text_module_to_files(child, os.path.join(file_path, child.name), flat_folder)
 
 if __name__ == "__main__":
+
     path = "/users/drw/transformers/src/transformers/models/"
     pytorch_path = "/users/drw/pytorch/torch/nn/modules/"
 
@@ -113,9 +112,9 @@ if __name__ == "__main__":
     # config.num_decoder_layers=2
     # config.vocab_size=24
     # bertModel = AutoModelForSeq2SeqLM.from_config(config)
-    bertModel = AutoModelForSeq2SeqLM.from_pretrained("google/flan-t5-base")#, load_in_8bit=True, device_map="auto")
-    seed: str = bertModel._get_name()
-    tm = breakdown_module(seed, bertModel, class_to_text)
+    llm_model = AutoModelForSeq2SeqLM.from_pretrained("google/flan-t5-base")#, load_in_8bit=True, device_map="auto")
+    seed: str = llm_model._get_name()
+    tm = breakdown_module(seed, llm_model, class_to_text)
     print(tm)
     text_module_to_files(tm, f"./flan-t5-base/", flat_folder=False)
 
