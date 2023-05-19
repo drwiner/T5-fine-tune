@@ -16,6 +16,7 @@ from torch.utils.data import Dataset, DataLoader
 from transformers import (AdamW, T5ForConditionalGeneration, T5Tokenizer, get_linear_schedule_with_warmup)
 import pytorch_lightning as pl
 from pytorch_lightning.callbacks import ModelCheckpoint
+from pytorch_lightning.loggers import TensorBoardLogger
 
 from termcolor import colored
 from sklearn.model_selection import train_test_split
@@ -159,7 +160,6 @@ class BioQAModel(pl.LightningModule):
     def __init__(self, model_name: str):
         super().__init__()
         self.model = T5ForConditionalGeneration.from_pretrained(model_name, return_dict=True)
-        self.tokenizer = T5Tokenizer.from_pretrained(model_name)
 
     def forward(self, input_ids, attention_mask, labels=None):
         output = self.model(
@@ -201,6 +201,7 @@ class BioQAModel(pl.LightningModule):
         return AdamW(self.parameters(), lr=5e-5)
 
 
+
 if __name__ == "__main__":
     factoid_paths = sorted(list(Path("./datasets/QA/BioASQ").glob("BioASQ-train-factoid-*")))
 
@@ -233,8 +234,9 @@ if __name__ == "__main__":
         monitor="val_loss",
         mode="min"
     )
-
+    logger = TensorBoardLogger("lightning_logs", name="bio-qa")
     trainer = pl.Trainer(
+        logger=logger,
         callbacks=[checkpoint_callback],
         max_epochs=N_EPOCHS,
         enable_progress_bar=True
